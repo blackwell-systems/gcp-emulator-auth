@@ -9,7 +9,7 @@
 
 ## Purpose
 
-This package provides common functionality for integrating GCP emulators (Secret Manager, KMS, etc.) with the IAM Emulator as a shared authorization layer.
+This package provides common functionality for integrating GCP emulators ([Secret Manager](https://github.com/blackwell-systems/gcp-secret-manager-emulator), [KMS](https://github.com/blackwell-systems/gcp-kms-emulator), etc.) with the [IAM Emulator](https://github.com/blackwell-systems/gcp-iam-emulator) as a shared authorization layer.
 
 **Key features:**
 - Principal extraction (gRPC + HTTP)
@@ -17,6 +17,12 @@ This package provides common functionality for integrating GCP emulators (Secret
 - IAM client with timeout and mode handling
 - Error classification (connectivity vs config)
 - Consistent behavior across all emulators
+
+**Used by:**
+- [GCP Secret Manager Emulator](https://github.com/blackwell-systems/gcp-secret-manager-emulator)
+- [GCP KMS Emulator](https://github.com/blackwell-systems/gcp-kms-emulator)
+
+**See also:** [Integration Guide](https://github.com/blackwell-systems/gcp-iam-emulator/blob/main/docs/INTEGRATION.md) for complete emulator mesh documentation
 
 ## Installation
 
