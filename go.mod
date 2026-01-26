@@ -1,6 +1,6 @@
 module github.com/blackwell-systems/gcp-emulator-auth
 
-go 1.25.5
+go 1.24
 
 require (
 	google.golang.org/genproto v0.0.0-20260126211449-d11affda4bed
