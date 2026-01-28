@@ -218,6 +218,63 @@ IAM_MODE=strict IAM_EMULATOR_HOST=localhost:8080 ./server
 
 **Use for:** CI/CD to catch permission issues before production.
 
+## Authorization Tracing
+
+Structured logging of authorization decisions for debugging and audit trails.
+
+### Enable Tracing
+
+```bash
+# Emit traces to file
+IAM_TRACE_OUTPUT=./authz-trace.jsonl IAM_MODE=strict ./your-service
+
+# Or to stdout
+IAM_TRACE_OUTPUT=stdout IAM_MODE=strict ./your-service
+```
+
+### What Gets Traced
+
+Every `CheckPermission` call emits:
+- `authz_check` event - permission check outcome (ALLOW/DENY)
+- `authz_error` event - IAM failures (unreachable, timeout, config errors)
+
+### Use Cases
+
+**Debug Why Access Failed:**
+```bash
+# See denied permissions
+cat authz-trace.jsonl | jq 'select(.decision.outcome=="DENY")'
+```
+
+**Audit What Was Accessed:**
+```bash
+# List all resources accessed during test run
+cat authz-trace.jsonl | \
+  jq -r 'select(.decision.outcome=="ALLOW") | .target.resource' | sort -u
+```
+
+**Performance Analysis:**
+```bash
+# Check IAM call latency
+cat authz-trace.jsonl | jq '.decision.latency_ms' | \
+  awk '{sum+=$1; n++} END {print "Avg:", sum/n, "ms"}'
+```
+
+**CI/CD Audit Trail:**
+```bash
+# Archive traces for compliance
+IAM_TRACE_OUTPUT=$CI_ARTIFACTS_DIR/authz-$(date +%Y%m%d).jsonl go test ./...
+```
+
+### Trace Schema
+
+Events follow schema v1.0 from `pkg/trace`:
+- JSONL format (one event per line)
+- Schema-versioned for compatibility
+- Includes principal, resource, permission, outcome, timing
+
+See `pkg/trace/types.go` for complete schema definition.
+
 ## Error Handling
 
 The package classifies errors into three categories:
