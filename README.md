@@ -21,7 +21,7 @@ Unlike mocks (which allow everything) or observers like iamlive (which record af
 | Observer | iamlive (AWS) | After | Records what you used |
 | **Control Plane** | **Blackwell IAM** | **Before** | **Denies unauthorized** |
 
-**Key insight:** Pre-flight enforcement catches permission bugs in development and CI, not production.
+Pre-flight enforcement catches permission bugs in development and CI, not production.
 
 ## Architecture
 
