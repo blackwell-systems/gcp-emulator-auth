@@ -23,6 +23,24 @@ Unlike mocks (which allow everything) or observers like iamlive (which record af
 
 Pre-flight enforcement catches permission bugs in development and CI, not production.
 
+## The Security Paradox
+
+> "A test that cannot fail due to a permission error is a test that has not fully validated the code's production readiness."
+
+Standard GCP emulators give you a false sense of security. Your integration tests pass with flying colors locally, but the moment you deploy to production, you hit `PermissionDenied` errors because:
+- You forgot to grant the service account the right role
+- Your conditional policy doesn't match what you thought
+- A permission was removed in a recent GCP update
+
+**This library solves that:**
+
+By enforcing IAM policies before data access, your tests **fail during development** the exact same way they would fail in production. This means:
+- No more "Friday night IAM outages"
+- Security reviews happen before merge, not after deploy
+- Permission bugs are caught in CI, not in incident postmortems
+
+This is the enforcement proxy that **closes the hermetic seal** on GCP testing.
+
 ## Architecture
 
 ```
