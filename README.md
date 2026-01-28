@@ -2,14 +2,14 @@
 
 [![Blackwell Systems](https://raw.githubusercontent.com/blackwell-systems/blackwell-docs-theme/main/badge-trademark.svg)](https://github.com/blackwell-systems)
 [![CI](https://github.com/blackwell-systems/gcp-emulator-auth/actions/workflows/ci.yml/badge.svg)](https://github.com/blackwell-systems/gcp-emulator-auth/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/blackwell-systems/gcp-emulator-auth/branch/main/graph/badge.svg)](https://codecov.io/gh/blackwell-systems/gcp-emulator-auth)
+[![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/blackwell-systems/gcp-emulator-auth/master/.github/badges/coverage.json)](https://github.com/blackwell-systems/gcp-emulator-auth/actions/workflows/ci.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/blackwell-systems/gcp-emulator-auth.svg)](https://pkg.go.dev/github.com/blackwell-systems/gcp-emulator-auth)
 [![Go Version](https://img.shields.io/badge/go-1.24+-blue.svg)](https://go.dev/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 > Shared authentication and authorization package for Blackwell Systems GCP emulators
 
-**Note:** This is an internal library used by emulator implementations. If you're running emulators via the [control plane](https://github.com/blackwell-systems/gcp-emulator-control-plane), you don't need this directly. If you're building a new emulator to join the ecosystem, see the [Integration Contract](https://github.com/blackwell-systems/gcp-iam-emulator/blob/main/docs/INTEGRATION.md).
+**Note:** This is an internal library used by emulator implementations. If you're running emulators via the [control plane CLI](https://github.com/blackwell-systems/gcp-emulator-control-plane), you don't need this directly. If you're building a new emulator to join the ecosystem, see the [Integration Contract](https://github.com/blackwell-systems/gcp-iam-emulator/blob/main/docs/INTEGRATION.md).
 
 ## Purpose
 
