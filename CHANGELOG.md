@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-01-28
+
+### Added
+- **Component Parameter**: NewClient now requires component name
+  - Enables identifying which service is making authorization requests
+  - Component name appears in trace environment.component field
+  - Example: "gcp-secret-manager-emulator", "gcp-kms-emulator"
+
+### Changed
+- **BREAKING**: NewClient signature changed from (host, mode) to (host, mode, component)
+  - All callers must update to provide component name
+  - Use descriptive names like service identifier
+- Trace emission now uses caller-provided component instead of hardcoded "gcp-emulator-auth"
+
+### Purpose
+- **Source Clarity**: Distinguish decision maker (IAM emulator) from request caller (SM/KMS)
+- **Analysis Tools**: Filter traces by requesting component
+- **Observability**: Full context of authorization flow from caller to policy engine
+
+## [0.2.0] - 2026-01-28
+
 ### Added
 - **Client Trace Emission**: Authorization events emitted from CheckPermission
   - Emit `authz_check` events for every permission check (ALLOW/DENY)
