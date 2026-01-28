@@ -91,7 +91,7 @@ func (v *Validator) ValidateJSONLFile(path string) error {
 	if err != nil {
 		return err
 	}
-	defer closeFn()
+	defer func() { _ = closeFn() }()
 
 	scanner := bufio.NewScanner(r)
 	lineNum := 0

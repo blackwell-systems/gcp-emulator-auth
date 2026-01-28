@@ -87,7 +87,7 @@ func (c *Client) CheckPermission(
 
 	// Check if permission was granted
 	allowed := len(resp.Permissions) == 1
-	
+
 	// Emit authorization trace
 	c.emitAuthzTrace(principal, resource, permission, allowed, duration)
 
