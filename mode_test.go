@@ -81,4 +81,3 @@ func TestAuthModeIsEnabled(t *testing.T) {
 		})
 	}
 }
-

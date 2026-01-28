@@ -52,7 +52,7 @@ func TestMain(m *testing.M) {
 	)
 	iamServerCmd.Stdout = os.Stdout
 	iamServerCmd.Stderr = os.Stderr
-	
+
 	if err := iamServerCmd.Start(); err != nil {
 		fmt.Printf("Failed to start IAM emulator: %v\n", err)
 		os.Exit(1)
@@ -61,7 +61,7 @@ func TestMain(m *testing.M) {
 	// Wait for IAM emulator to be ready
 	fmt.Println("Waiting for IAM emulator to be ready...")
 	if !waitForIAMEmulator(iamEmulatorHost, 10*time.Second) {
-		iamServerCmd.Process.Kill()
+		_ = iamServerCmd.Process.Kill()
 		fmt.Println("IAM emulator failed to start")
 		os.Exit(1)
 	}
@@ -73,8 +73,8 @@ func TestMain(m *testing.M) {
 	// Cleanup
 	fmt.Println("Stopping IAM emulator...")
 	if iamServerCmd != nil && iamServerCmd.Process != nil {
-		iamServerCmd.Process.Kill()
-		iamServerCmd.Wait()
+		_ = iamServerCmd.Process.Kill()
+		_ = iamServerCmd.Wait()
 	}
 
 	os.Exit(code)
@@ -89,7 +89,7 @@ func waitForIAMEmulator(host string, timeout time.Duration) bool {
 			_, err := client.CheckPermission(ctx, "user:test@example.com", "test-resource", "test.permission")
 			cancel()
 			client.Close()
-			
+
 			// Any response (even permission denied) means emulator is up
 			if err == nil || !IsConnectivityError(err) {
 				return true
@@ -136,7 +136,7 @@ func TestNewClient(t *testing.T) {
 			}
 			if client != nil {
 				defer client.Close()
-				
+
 				if client.mode != tt.mode {
 					t.Errorf("Client mode = %v, want %v", client.mode, tt.mode)
 				}
@@ -158,10 +158,10 @@ func TestClientClose(t *testing.T) {
 	if err != nil {
 		t.Errorf("Close() error = %v", err)
 	}
-	
+
 	// Set conn to nil after close (idempotent close pattern)
 	client.conn = nil
-	
+
 	// Close again should not error (nil conn check)
 	err = client.Close()
 	if err != nil {
@@ -179,7 +179,7 @@ func TestCheckPermission_StrictMode_Allowed(t *testing.T) {
 	defer client.Close()
 
 	ctx := context.Background()
-	
+
 	// Test with a permission check (result depends on policy file)
 	allowed, err := client.CheckPermission(
 		ctx,
@@ -191,7 +191,7 @@ func TestCheckPermission_StrictMode_Allowed(t *testing.T) {
 	// We don't assert allowed true/false because it depends on policy
 	// We just verify the call succeeds and returns valid data
 	t.Logf("Permission check: allowed=%v, err=%v", allowed, err)
-	
+
 	// Should not have connectivity error in strict mode with running emulator
 	if err != nil && IsConnectivityError(err) {
 		t.Errorf("Unexpected connectivity error in strict mode with running emulator: %v", err)
@@ -208,7 +208,7 @@ func TestCheckPermission_PermissiveMode_Connectivity(t *testing.T) {
 	defer client.Close()
 
 	ctx := context.Background()
-	
+
 	// This should fail to connect but return true (fail-open)
 	allowed, err := client.CheckPermission(
 		ctx,
@@ -220,7 +220,7 @@ func TestCheckPermission_PermissiveMode_Connectivity(t *testing.T) {
 	if !allowed {
 		t.Error("Permissive mode should allow on connectivity error (fail-open)")
 	}
-	
+
 	if err != nil {
 		t.Error("Permissive mode should not return error on connectivity failure (fail-open)")
 	}
@@ -236,7 +236,7 @@ func TestCheckPermission_StrictMode_Connectivity(t *testing.T) {
 	defer client.Close()
 
 	ctx := context.Background()
-	
+
 	// This should fail to connect and return false (fail-closed)
 	allowed, err := client.CheckPermission(
 		ctx,
@@ -248,11 +248,11 @@ func TestCheckPermission_StrictMode_Connectivity(t *testing.T) {
 	if allowed {
 		t.Error("Strict mode should deny on connectivity error (fail-closed)")
 	}
-	
+
 	if err == nil {
 		t.Error("Strict mode should return error on connectivity failure")
 	}
-	
+
 	if !IsConnectivityError(err) {
 		t.Errorf("Expected connectivity error, got: %v", err)
 	}
@@ -267,7 +267,7 @@ func TestCheckPermission_PrincipalInjection(t *testing.T) {
 	defer client.Close()
 
 	ctx := context.Background()
-	
+
 	principals := []string{
 		"user:alice@example.com",
 		"user:bob@example.com",
@@ -284,7 +284,7 @@ func TestCheckPermission_PrincipalInjection(t *testing.T) {
 				"projects/test-project/secrets/test-secret",
 				"secretmanager.secrets.get",
 			)
-			
+
 			// We don't assert the result, just that principal injection works
 			// The fact that we get any response (not a panic) means injection worked
 			t.Logf("Principal %s: err=%v", principal, err)
@@ -300,7 +300,7 @@ func TestCheckPermission_EmptyPrincipal(t *testing.T) {
 	defer client.Close()
 
 	ctx := context.Background()
-	
+
 	// Empty principal should still make the call (IAM emulator decides how to handle it)
 	allowed, err := client.CheckPermission(
 		ctx,
@@ -308,9 +308,9 @@ func TestCheckPermission_EmptyPrincipal(t *testing.T) {
 		"projects/test-project/secrets/test-secret",
 		"secretmanager.secrets.get",
 	)
-	
+
 	t.Logf("Empty principal: allowed=%v, err=%v", allowed, err)
-	
+
 	// Should get a response (IAM decides if empty principal is valid)
 	// We just verify it doesn't panic or fail for connectivity reasons
 	if err != nil && IsConnectivityError(err) {
@@ -329,24 +329,65 @@ func TestCheckPermission_Timeout(t *testing.T) {
 	// Create a context that's already cancelled
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
-	
+
 	allowed, err := client.CheckPermission(
 		ctx,
 		"user:test@example.com",
 		"projects/test-project/secrets/test-secret",
 		"secretmanager.secrets.get",
 	)
-	
+
 	if allowed {
 		t.Error("Should not allow with cancelled context")
 	}
-	
+
 	if err == nil {
 		t.Error("Should return error with cancelled context")
 	}
-	
+
 	if !IsConnectivityError(err) {
 		t.Errorf("Cancelled context should be connectivity error, got: %v", err)
+	}
+}
+
+func TestCheckPermission_ConfigError_BothModes(t *testing.T) {
+	// Test that config errors (InvalidArgument, Internal, Unimplemented)
+	// deny in BOTH permissive and strict modes
+
+	modes := []AuthMode{AuthModePermissive, AuthModeStrict}
+
+	for _, mode := range modes {
+		t.Run(string(mode), func(t *testing.T) {
+			client, err := NewClient(iamEmulatorHost, mode)
+			if err != nil {
+				t.Fatalf("Failed to create client: %v", err)
+			}
+			defer client.Close()
+
+			ctx := context.Background()
+
+			// Try to trigger config error with empty resource (IAM emulator should reject)
+			allowed, err := client.CheckPermission(
+				ctx,
+				"user:test@example.com",
+				"", // Empty resource should trigger InvalidArgument
+				"secretmanager.secrets.get",
+			)
+
+			// If IAM emulator doesn't return error for empty resource, skip this test
+			if err == nil {
+				t.Skip("IAM emulator accepts empty resource, cannot test config error path")
+			}
+
+			// Config errors should always deny, regardless of mode
+			if allowed {
+				t.Errorf("%s mode should deny on config error", mode)
+			}
+
+			// Should be classified as config error (or might be connectivity if emulator changed)
+			t.Logf("%s mode config error test: allowed=%v, err=%v, isConnectivity=%v, isConfig=%v",
+				mode, allowed, err, IsConnectivityError(err), IsConfigError(err))
+		})
 	}
 }
 
@@ -359,7 +400,7 @@ func TestCheckPermission_MultiplePermissions(t *testing.T) {
 	defer client.Close()
 
 	ctx := context.Background()
-	
+
 	permissions := []string{
 		"secretmanager.secrets.get",
 		"secretmanager.versions.access",
@@ -375,10 +416,10 @@ func TestCheckPermission_MultiplePermissions(t *testing.T) {
 				"projects/test-project/secrets/test-secret",
 				permission,
 			)
-			
+
 			// Just verify the call works for different permissions
 			t.Logf("Permission %s: allowed=%v, err=%v", permission, allowed, err)
-			
+
 			// Should not have connectivity errors
 			if err != nil && IsConnectivityError(err) {
 				t.Errorf("Unexpected connectivity error for permission %s", permission)

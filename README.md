@@ -1,6 +1,8 @@
 # GCP Emulator Auth
 
 [![Blackwell Systems](https://raw.githubusercontent.com/blackwell-systems/blackwell-docs-theme/main/badge-trademark.svg)](https://github.com/blackwell-systems)
+[![CI](https://github.com/blackwell-systems/gcp-emulator-auth/actions/workflows/ci.yml/badge.svg)](https://github.com/blackwell-systems/gcp-emulator-auth/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/blackwell-systems/gcp-emulator-auth/branch/main/graph/badge.svg)](https://codecov.io/gh/blackwell-systems/gcp-emulator-auth)
 [![Go Reference](https://pkg.go.dev/badge/github.com/blackwell-systems/gcp-emulator-auth.svg)](https://pkg.go.dev/github.com/blackwell-systems/gcp-emulator-auth)
 [![Go Version](https://img.shields.io/badge/go-1.24+-blue.svg)](https://go.dev/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
