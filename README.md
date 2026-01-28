@@ -9,7 +9,7 @@
 
 > **Enforce real GCP IAM policies before requests reach emulators — make local environments fail exactly like production.**
 
-This is the **enforcement proxy** component of the Blackwell [Local IAM Control Plane](CATEGORY.md). It sits between your application and service emulators (Secret Manager, KMS, etc.), checking permissions before allowing data access.
+This is the **enforcement proxy** component of the Blackwell Local IAM Control Plane. It sits between your application and service emulators (Secret Manager, KMS, etc.), checking permissions before allowing data access.
 
 ## What This Is
 
@@ -54,7 +54,7 @@ Unlike mocks (which allow everything) or observers like iamlive (which record af
 └─────────────────────────────────────────┘
 ```
 
-See [CATEGORY.md](CATEGORY.md) for the complete category definition.
+This library is used by all Blackwell service emulators to provide consistent IAM enforcement.
 
 ## Who Uses This
 
