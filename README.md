@@ -1,4 +1,4 @@
-# GCP Emulator Auth
+# Local IAM Control Plane — Enforcement Proxy
 
 [![Blackwell Systems](https://raw.githubusercontent.com/blackwell-systems/blackwell-docs-theme/main/badge-trademark.svg)](https://github.com/blackwell-systems)
 [![CI](https://github.com/blackwell-systems/gcp-emulator-auth/actions/workflows/ci.yml/badge.svg)](https://github.com/blackwell-systems/gcp-emulator-auth/actions/workflows/ci.yml)
@@ -7,28 +7,66 @@
 [![Go Version](https://img.shields.io/badge/go-1.24+-blue.svg)](https://go.dev/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-> Shared authentication and authorization package for Blackwell Systems GCP emulators
+> **Enforce real GCP IAM policies before requests reach emulators — make local environments fail exactly like production.**
 
-**Note:** This is an internal library used by emulator implementations. If you're running emulators via the [control plane CLI](https://github.com/blackwell-systems/gcp-emulator-control-plane), you don't need this directly. If you're building a new emulator to join the ecosystem, see the [Integration Contract](https://github.com/blackwell-systems/gcp-iam-emulator/blob/main/docs/INTEGRATION.md).
+This is the **enforcement proxy** component of the Blackwell [Local IAM Control Plane](CATEGORY.md). It sits between your application and service emulators (Secret Manager, KMS, etc.), checking permissions before allowing data access.
 
-## Purpose
+## What This Is
 
-This package provides common functionality for integrating GCP emulators ([Secret Manager](https://github.com/blackwell-systems/gcp-secret-manager-emulator), [KMS](https://github.com/blackwell-systems/gcp-kms-emulator), etc.) with the [IAM Emulator](https://github.com/blackwell-systems/gcp-iam-emulator) as a shared authorization layer.
+Unlike mocks (which allow everything) or observers like iamlive (which record after the fact), this library **actively denies unauthorized requests** using real IAM policy evaluation.
 
-**Key features:**
-- Principal extraction (gRPC + HTTP)
-- Environment configuration parsing
-- IAM client with timeout and mode handling
-- Error classification (connectivity vs config)
-- Consistent behavior across all emulators
+| Approach | Example | When | Behavior |
+|----------|---------|------|----------|
+| Mock | Standard emulators | Never | Always allows |
+| Observer | iamlive (AWS) | After | Records what you used |
+| **Control Plane** | **Blackwell IAM** | **Before** | **Denies unauthorized** |
 
-**Used by:**
+**Key insight:** Pre-flight enforcement catches permission bugs in development and CI, not production.
+
+## Architecture
+
+```
+┌─────────────────────────────────────────┐
+│  Your Application Code                  │
+│  (GCP client libraries)                 │
+└────────────────┬────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────┐
+│  DATA PLANE                             │
+│  Service Emulator (Secret Manager, KMS) │
+│                                         │
+│  Uses THIS LIBRARY to:                  │
+│  1. Extract principal from request      │
+│  2. Check permission                    │
+│  3. Deny if unauthorized                │
+└────────────────┬────────────────────────┘
+                 │
+                 │ CheckPermission(principal, resource, permission)
+                 ▼
+┌─────────────────────────────────────────┐
+│  CONTROL PLANE                          │
+│  IAM Emulator (Policy Engine)           │
+│                                         │
+│  - Role bindings                        │
+│  - Group memberships                    │
+│  - Policy inheritance                   │
+└─────────────────────────────────────────┘
+```
+
+See [CATEGORY.md](CATEGORY.md) for the complete category definition.
+
+## Who Uses This
+
+**Service emulator developers:** This library enforces IAM policies in your emulator.
+
+**End users:** Use the [control plane CLI](https://github.com/blackwell-systems/gcp-emulator-control-plane) instead — it manages the entire stack for you.
+
+**Currently integrated:**
 - [GCP Secret Manager Emulator](https://github.com/blackwell-systems/gcp-secret-manager-emulator)
 - [GCP KMS Emulator](https://github.com/blackwell-systems/gcp-kms-emulator)
 
-**For users:** If you want to run these emulators, use the [**control plane CLI**](https://github.com/blackwell-systems/gcp-emulator-control-plane) which manages the entire emulator mesh for you.
-
-**For developers:** See the [Integration Guide](https://github.com/blackwell-systems/gcp-iam-emulator/blob/main/docs/INTEGRATION.md) if you're building a new emulator to join the ecosystem.
+**Building a new emulator?** See the [Integration Contract](https://github.com/blackwell-systems/gcp-iam-emulator/blob/main/docs/INTEGRATION.md).
 
 ## Installation
 
