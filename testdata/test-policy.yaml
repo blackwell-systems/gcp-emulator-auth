@@ -1,0 +1,17 @@
+roles:
+  roles/custom.secretAccessor:
+    permissions:
+      - secretmanager.secrets.get
+      - secretmanager.versions.access
+
+groups:
+  testers:
+    members:
+      - user:test@example.com
+
+projects:
+  test-project:
+    bindings:
+      - role: roles/custom.secretAccessor
+        members:
+          - group:testers

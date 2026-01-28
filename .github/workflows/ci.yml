@@ -20,15 +20,27 @@ jobs:
         with:
           go-version: '1.24'
       
-      - name: Run tests
+      - name: Checkout IAM emulator (for integration tests)
+        uses: actions/checkout@v4
+        with:
+          repository: blackwell-systems/gcp-iam-emulator
+          path: gcp-iam-emulator
+      
+      - name: Build IAM emulator
+        working-directory: gcp-iam-emulator
+        run: go build -o bin/server ./cmd/server
+      
+      - name: Run tests with IAM emulator
+        env:
+          IAM_EMULATOR_BINARY: gcp-iam-emulator/bin/server
         run: go test -v -race -coverprofile=coverage.out ./...
       
       - name: Check coverage
         run: |
           coverage=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
           echo "Coverage: $coverage%"
-          if (( $(echo "$coverage < 60" | bc -l) )); then
-            echo "Coverage below 60%"
+          if (( $(echo "$coverage < 90" | bc -l) )); then
+            echo "Coverage below 90%"
             exit 1
           fi
       
