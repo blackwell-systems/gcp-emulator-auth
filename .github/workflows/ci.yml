@@ -28,6 +28,9 @@ jobs:
           repository: blackwell-systems/gcp-iam-emulator
           path: gcp-iam-emulator
       
+      - name: Link current repo for IAM emulator's replace directive
+        run: ln -s $(pwd) gcp-iam-emulator/gcp-emulator-auth
+      
       - name: Build IAM emulator
         working-directory: gcp-iam-emulator
         run: go build -o bin/server ./cmd/server
