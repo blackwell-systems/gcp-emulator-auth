@@ -18,10 +18,11 @@ type Client struct {
 	mode        AuthMode
 	timeout     time.Duration
 	traceWriter *trace.Writer
+	component   string // Calling component name for trace emission
 }
 
 // NewClient creates a new IAM emulator client
-func NewClient(host string, mode AuthMode) (*Client, error) {
+func NewClient(host string, mode AuthMode, component string) (*Client, error) {
 	conn, err := grpc.NewClient(
 		host,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -33,12 +34,18 @@ func NewClient(host string, mode AuthMode) (*Client, error) {
 	// Initialize trace writer from environment
 	traceWriter, _ := trace.NewWriterFromEnv()
 
+	// Default component if empty
+	if component == "" {
+		component = "unknown"
+	}
+
 	return &Client{
 		client:      iampb.NewIAMPolicyClient(conn),
 		conn:        conn,
 		mode:        mode,
 		timeout:     2 * time.Second,
 		traceWriter: traceWriter,
+		component:   component,
 	}, nil
 }
 
@@ -128,7 +135,7 @@ func (c *Client) emitAuthzTrace(principal, resource, permission string, allowed 
 		},
 		Environment: &trace.Environment{
 			Mode:      string(c.mode),
-			Component: "gcp-emulator-auth",
+			Component: c.component,
 		},
 	}
 
@@ -163,7 +170,7 @@ func (c *Client) emitErrorTrace(principal, resource, permission string, err erro
 		},
 		Environment: &trace.Environment{
 			Mode:      string(c.mode),
-			Component: "gcp-emulator-auth",
+			Component: c.component,
 		},
 	}
 

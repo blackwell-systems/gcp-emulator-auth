@@ -83,7 +83,7 @@ func TestMain(m *testing.M) {
 func waitForIAMEmulator(host string, timeout time.Duration) bool {
 	deadline := time.Now().Add(timeout)
 	for time.Now().Before(deadline) {
-		client, err := NewClient(host, AuthModeStrict)
+		client, err := NewClient(host, AuthModeStrict, "test-client")
 		if err == nil {
 			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 			_, err := client.CheckPermission(ctx, "user:test@example.com", "test-resource", "test.permission")
@@ -129,7 +129,7 @@ func TestNewClient(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client, err := NewClient(tt.host, tt.mode)
+			client, err := NewClient(tt.host, tt.mode, "test-client")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewClient() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -149,7 +149,7 @@ func TestNewClient(t *testing.T) {
 }
 
 func TestClientClose(t *testing.T) {
-	client, err := NewClient(iamEmulatorHost, AuthModeStrict)
+	client, err := NewClient(iamEmulatorHost, AuthModeStrict, "test-client")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -172,7 +172,7 @@ func TestClientClose(t *testing.T) {
 func TestCheckPermission_StrictMode_Allowed(t *testing.T) {
 	// This test requires a policy file that allows the permission
 	// For now, we test the mechanics work
-	client, err := NewClient(iamEmulatorHost, AuthModeStrict)
+	client, err := NewClient(iamEmulatorHost, AuthModeStrict, "test-client")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -201,7 +201,7 @@ func TestCheckPermission_StrictMode_Allowed(t *testing.T) {
 func TestCheckPermission_PermissiveMode_Connectivity(t *testing.T) {
 	// Test permissive mode fail-open behavior
 	// Connect to non-existent host to simulate connectivity failure
-	client, err := NewClient("localhost:9999", AuthModePermissive)
+	client, err := NewClient("localhost:9999", AuthModePermissive, "test-client")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -229,7 +229,7 @@ func TestCheckPermission_PermissiveMode_Connectivity(t *testing.T) {
 func TestCheckPermission_StrictMode_Connectivity(t *testing.T) {
 	// Test strict mode fail-closed behavior
 	// Connect to non-existent host to simulate connectivity failure
-	client, err := NewClient("localhost:9999", AuthModeStrict)
+	client, err := NewClient("localhost:9999", AuthModeStrict, "test-client")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -260,7 +260,7 @@ func TestCheckPermission_StrictMode_Connectivity(t *testing.T) {
 
 func TestCheckPermission_PrincipalInjection(t *testing.T) {
 	// Verify that principal is properly injected into outgoing metadata
-	client, err := NewClient(iamEmulatorHost, AuthModeStrict)
+	client, err := NewClient(iamEmulatorHost, AuthModeStrict, "test-client")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -293,7 +293,7 @@ func TestCheckPermission_PrincipalInjection(t *testing.T) {
 }
 
 func TestCheckPermission_EmptyPrincipal(t *testing.T) {
-	client, err := NewClient(iamEmulatorHost, AuthModeStrict)
+	client, err := NewClient(iamEmulatorHost, AuthModeStrict, "test-client")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -320,7 +320,7 @@ func TestCheckPermission_EmptyPrincipal(t *testing.T) {
 
 func TestCheckPermission_Timeout(t *testing.T) {
 	// Test that timeout is applied (2 seconds default)
-	client, err := NewClient(iamEmulatorHost, AuthModeStrict)
+	client, err := NewClient(iamEmulatorHost, AuthModeStrict, "test-client")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -358,7 +358,7 @@ func TestCheckPermission_ConfigError_BothModes(t *testing.T) {
 
 	for _, mode := range modes {
 		t.Run(string(mode), func(t *testing.T) {
-			client, err := NewClient(iamEmulatorHost, mode)
+			client, err := NewClient(iamEmulatorHost, mode, "test-client")
 			if err != nil {
 				t.Fatalf("Failed to create client: %v", err)
 			}
@@ -393,7 +393,7 @@ func TestCheckPermission_ConfigError_BothModes(t *testing.T) {
 
 func TestCheckPermission_MultiplePermissions(t *testing.T) {
 	// Test checking multiple different permissions
-	client, err := NewClient(iamEmulatorHost, AuthModeStrict)
+	client, err := NewClient(iamEmulatorHost, AuthModeStrict, "test-client")
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
