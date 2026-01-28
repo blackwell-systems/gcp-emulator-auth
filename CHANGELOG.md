@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Client Trace Emission**: Authorization events emitted from CheckPermission
+  - Emit `authz_check` events for every permission check (ALLOW/DENY)
+  - Emit `authz_error` events for IAM connectivity failures
+  - Captures principal, resource, permission, outcome, mode, and latency
+  - Automatic classification: `iam_unreachable`, `invalid_request`, `policy_error`
+  - Uses same `IAM_TRACE_OUTPUT` env var as IAM emulator
 - **Trace Emission Package** (`pkg/trace/`):
   - JSONL trace schema v1.0 for authorization events
   - `AuthzEvent` struct with `authz_check` and `authz_error` event types
