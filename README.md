@@ -26,7 +26,9 @@ This package provides common functionality for integrating GCP emulators ([Secre
 - [GCP Secret Manager Emulator](https://github.com/blackwell-systems/gcp-secret-manager-emulator)
 - [GCP KMS Emulator](https://github.com/blackwell-systems/gcp-kms-emulator)
 
-**See also:** [Integration Guide](https://github.com/blackwell-systems/gcp-iam-emulator/blob/main/docs/INTEGRATION.md) for complete emulator mesh documentation
+**For users:** If you want to run these emulators, use the [**control plane CLI**](https://github.com/blackwell-systems/gcp-emulator-control-plane) which manages the entire emulator mesh for you.
+
+**For developers:** See the [Integration Guide](https://github.com/blackwell-systems/gcp-iam-emulator/blob/main/docs/INTEGRATION.md) if you're building a new emulator to join the ecosystem.
 
 ## Installation
 
@@ -224,9 +226,10 @@ Maintained by **Dayna Blackwell** — founder of Blackwell Systems, building ref
 
 ## Related Projects
 
+- [**GCP Emulator Control Plane**](https://github.com/blackwell-systems/gcp-emulator-control-plane) - CLI tool to run the emulator mesh
 - [GCP IAM Emulator](https://github.com/blackwell-systems/gcp-iam-emulator) - The IAM policy engine
-- [GCP Secret Manager Emulator](https://github.com/blackwell-systems/gcp-secret-manager-emulator)
-- [GCP KMS Emulator](https://github.com/blackwell-systems/gcp-kms-emulator)
+- [GCP Secret Manager Emulator](https://github.com/blackwell-systems/gcp-secret-manager-emulator) - Secrets management
+- [GCP KMS Emulator](https://github.com/blackwell-systems/gcp-kms-emulator) - Key management and crypto operations
 
 ## License
 
