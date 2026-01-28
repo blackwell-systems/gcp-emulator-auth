@@ -1,8 +1,8 @@
 # Monetization Principles
 
 > **Last updated:** 2025-01-28  
-> **Status:** Binding commitment  
-> **Changes require:** Community discussion and consensus
+> **Status:** Maintainer commitment  
+> **Changes require:** Public discussion and maintainer consensus
 
 ---
 
@@ -11,6 +11,16 @@
 **This project will never gate capabilities that currently exist in open source.**
 
 If a feature is available today (2025-01-28) in the Blackwell Systems GCP emulator ecosystem, it will remain free and open source forever.
+
+### Definition: Existing Capability
+
+An "existing capability" is defined as:
+- **Functionality that is implemented, documented, and usable** in a released version
+- **Behavior that users reasonably rely on** for correctness or enforcement
+
+**Planned features, undocumented internals, experimental branches, or implied use cases do not qualify as existing capabilities.**
+
+This definition prevents bad-faith arguments about "implied features" while protecting genuine user expectations.
 
 ---
 
@@ -259,7 +269,7 @@ These tactics invite:
 **LocalStack** (AWS emulator suite):
 - OSS: Basic emulators, permissive by default
 - Pro: $39-89/user/month for IAM enforcement, compliance, persistence
-- $30M+ in funding, thousands of paying customers
+- Validates the open-core + workflow monetization model at scale
 
 **We have the same opportunity with GCP:**
 - Google Cloud: 13% market share, $10B+ quarterly revenue
@@ -270,14 +280,16 @@ These tactics invite:
 
 ## Governance
 
-### This Document Is Binding
+### This Document Is a Maintainer Commitment
 
-This document represents a **commitment to the community**. Changes require:
+This document represents a **commitment to users and the community**. Changes require:
 
 1. **Public discussion** - Proposed changes must be announced via GitHub Discussion
 2. **Community input period** - Minimum 30 days for feedback
 3. **Transparent rationale** - Clear explanation of why changes are needed
-4. **Majority consensus** - Active maintainers must agree
+4. **Maintainer consensus** - Active maintainers must agree by majority vote
+
+**Note:** Maintainers retain final authority to ensure project sustainability. However, changes that violate the core commitment (gating existing features) would fundamentally break trust and are not permissible.
 
 ### Enforcement
 
