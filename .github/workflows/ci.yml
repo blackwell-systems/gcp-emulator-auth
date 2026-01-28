@@ -16,11 +16,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
-      - name: Set up Go
-        uses: actions/setup-go@v5
         with:
-          go-version: '1.24'
+          path: gcp-emulator-auth
       
       - name: Checkout IAM emulator (for integration tests)
         uses: actions/checkout@v4
@@ -28,20 +25,24 @@ jobs:
           repository: blackwell-systems/gcp-iam-emulator
           path: gcp-iam-emulator
       
-      - name: Link current repo for IAM emulator's replace directive
-        run: ln -s $(pwd) gcp-iam-emulator/gcp-emulator-auth
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
       
       - name: Build IAM emulator
         working-directory: gcp-iam-emulator
         run: go build -o bin/server ./cmd/server
       
       - name: Run tests with IAM emulator
+        working-directory: gcp-emulator-auth
         env:
-          IAM_EMULATOR_BINARY: gcp-iam-emulator/bin/server
+          IAM_EMULATOR_BINARY: ../gcp-iam-emulator/bin/server
         run: go test -v -race -coverprofile=coverage.out ./...
       
       - name: Check coverage
         id: coverage
+        working-directory: gcp-emulator-auth
         run: |
           coverage=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
           echo "Coverage: $coverage%"
@@ -53,6 +54,7 @@ jobs:
       
       - name: Create coverage badge
         if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+        working-directory: gcp-emulator-auth
         run: |
           coverage=${{ steps.coverage.outputs.coverage }}
           # Determine color based on coverage
@@ -72,7 +74,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-badge
-          path: .github/badges/coverage.json
+          path: gcp-emulator-auth/.github/badges/coverage.json
           retention-days: 90
 
   lint:
