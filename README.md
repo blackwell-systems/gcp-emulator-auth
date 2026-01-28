@@ -7,6 +7,8 @@
 
 > Shared authentication and authorization package for Blackwell Systems GCP emulators
 
+**Note:** This is an internal library used by emulator implementations. If you're running emulators via the [control plane](https://github.com/blackwell-systems/gcp-emulator-control-plane), you don't need this directly. If you're building a new emulator to join the ecosystem, see the [Integration Contract](https://github.com/blackwell-systems/gcp-iam-emulator/blob/main/docs/INTEGRATION.md).
+
 ## Purpose
 
 This package provides common functionality for integrating GCP emulators ([Secret Manager](https://github.com/blackwell-systems/gcp-secret-manager-emulator), [KMS](https://github.com/blackwell-systems/gcp-kms-emulator), etc.) with the [IAM Emulator](https://github.com/blackwell-systems/gcp-iam-emulator) as a shared authorization layer.
