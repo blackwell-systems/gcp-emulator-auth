@@ -344,6 +344,25 @@ Maintained by **Dayna Blackwell** — founder of Blackwell Systems, building ref
 - [GCP Secret Manager Emulator](https://github.com/blackwell-systems/gcp-secret-manager-emulator) - Secrets management
 - [GCP KMS Emulator](https://github.com/blackwell-systems/gcp-kms-emulator) - Key management and crypto operations
 
+---
+
+## Who's Using This?
+
+If you're integrating this library into your own emulator or service — I'd love to hear how it's working.
+
+- **What service are you building?** (custom GCP emulator, internal IAM-aware service, testing framework)
+- **How smooth was the proxy integration?** (wrapped existing gRPC in hours, or hit sharp edges)
+- **Which features do you rely on?** (basic ALLOW/DENY, conditional policies, trace generation, group expansion)
+- **What's still friction?** (principal extraction patterns, error handling, performance overhead)
+
+Open an issue, start a discussion, or reach out directly:
+
+📬 dayna@blackwell-systems.com
+
+This helps shape the roadmap and ensures the library stays aligned with emulator developer needs.
+
+---
+
 ## License
 
 Apache License 2.0 - See [LICENSE](LICENSE) for details.
