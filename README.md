@@ -13,12 +13,12 @@ This is the **enforcement proxy** component of the Blackwell Local IAM Control P
 
 ## What This Is
 
-Unlike mocks (which allow everything) or observers like iamlive (which record after the fact), this library **actively denies unauthorized requests** using real IAM policy evaluation.
+Unlike mocks (which allow everything) or observers (which record after the fact), this library **actively denies unauthorized requests** using real IAM policy evaluation.
 
 | Approach | Example | When | Behavior |
 |----------|---------|------|----------|
 | Mock | Standard emulators | Never | Always allows |
-| Observer | iamlive (AWS) | After | Records what you used |
+| Observer | Post-execution analysis | After | Records what you used |
 | **Control Plane** | **Blackwell IAM** | **Before** | **Denies unauthorized** |
 
 Pre-flight enforcement catches permission bugs in development and CI, not production.
