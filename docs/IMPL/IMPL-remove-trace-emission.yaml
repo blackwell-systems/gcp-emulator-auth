@@ -1,0 +1,362 @@
+title: Remove trace emission from gcp-emulator-auth
+feature_slug: remove-trace-emission
+verdict: SUITABLE
+suitability_assessment: |
+    This work involves removing trace emission functionality from the gcp-emulator-auth
+    library while preserving core IAM client functionality and the pkg/trace types
+    (shared schema). The work is cleanly decomposable across 3 agents with disjoint
+    file ownership.
+
+    Decomposition:
+    - Agent A: Remove trace emission from Client (client.go, client_test.go)
+    - Agent B: Remove pkg/trace Writer implementation (writer.go, writer_test.go)
+    - Agent C: Remove pkg/trace Validator implementation (validator.go, validator_test.go)
+
+    The pkg/trace/types.go file is preserved as it defines a shared schema that may
+    be used by other repositories in the blackwell-systems GCP emulator suite.
+
+    Investigation-first items: None. The scope is clear from the requirements.
+
+    Interface discoverability: No cross-agent interfaces. All work is independent
+    removal of existing functionality.
+
+    Parallelization value: High. This is a straightforward removal with independent
+    file ownership. Build/test cycle is ~10s (go test). 3 agents working in parallel
+    reduces total time from ~15 min sequential to ~7 min parallel (including scout
+    and merge time).
+
+    Estimated times:
+    - Scout phase: ~5 min (dependency mapping, interface contracts, IMPL doc)
+    - Agent execution: ~5 min (3 agents × 2 min avg, accounting for parallelism)
+    - Merge & verification: ~2 min
+    Total SAW time: ~12 min
+
+    Sequential baseline: ~15 min (3 agents × 5 min avg sequential time)
+    Time savings: ~3 min (20% faster)
+
+    Recommendation: Marginal time savings, but SAW provides clear coordination value
+    with explicit file ownership and verification gates. Suitable for parallel execution.
+test_command: go test -v -race -coverprofile=coverage.out ./...
+lint_command: go vet ./...
+file_ownership:
+    - file: client.go
+      agent: A
+      wave: 1
+      action: modify
+    - file: client_test.go
+      agent: A
+      wave: 1
+      action: modify
+    - file: pkg/trace/writer.go
+      agent: B
+      wave: 1
+      action: delete
+    - file: pkg/trace/writer_test.go
+      agent: B
+      wave: 1
+      action: delete
+    - file: pkg/trace/validator.go
+      agent: C
+      wave: 1
+      action: delete
+    - file: pkg/trace/validator_test.go
+      agent: C
+      wave: 1
+      action: delete
+interface_contracts: []
+waves:
+    - number: 1
+      agents:
+        - id: A
+          task: |
+            ## Role
+            Remove trace emission functionality from Client struct and CheckPermission method.
+
+            ## What to Implement
+            Modify `client.go` and `client_test.go` to remove all trace emission functionality
+            while preserving core IAM client library functionality.
+
+            ### Changes to client.go
+            1. Remove the `traceWriter` field from the `Client` struct (line 20)
+            2. Remove the `component` field from the `Client` struct (line 21)
+            3. Update `NewClient` function signature from:
+               ```go
+               func NewClient(host string, mode AuthMode, component string) (*Client, error)
+               ```
+               to:
+               ```go
+               func NewClient(host string, mode AuthMode) (*Client, error)
+               ```
+            4. Remove trace writer initialization (lines 34-35):
+               ```go
+               // Initialize trace writer from environment
+               traceWriter, _ := trace.NewWriterFromEnv()
+               ```
+            5. Remove component default logic (lines 37-40):
+               ```go
+               // Default component if empty
+               if component == "" {
+                   component = "unknown"
+               }
+               ```
+            6. Remove `traceWriter` and `component` fields from Client struct initialization (lines 47-48)
+            7. Remove timing tracking in `CheckPermission` method:
+               - Remove `start := time.Now()` (line 59)
+               - Remove `duration := time.Since(start)` (line 73)
+            8. Remove trace emission call after error (line 77):
+               ```go
+               c.emitErrorTrace(principal, resource, permission, err, duration)
+               ```
+            9. Remove trace emission call after success (line 99):
+               ```go
+               c.emitAuthzTrace(principal, resource, permission, allowed, duration)
+               ```
+            10. Delete the entire `emitAuthzTrace` method (lines 104-144)
+            11. Delete the entire `emitErrorTrace` method (lines 146-179)
+            12. Remove the `"github.com/blackwell-systems/gcp-emulator-auth/pkg/trace"` import (line 11)
+
+            ### Changes to client_test.go
+            1. Update all `NewClient` calls to remove the third `component` parameter
+            2. Lines to update: 86, 132, 152, 175, 204, 232, 263, 296, 323, 361, 396
+            3. Change from: `NewClient(host, mode, "test-client")`
+            4. Change to: `NewClient(host, mode)`
+
+            ### Preserved Functionality
+            - IAM client connection management (`NewClient`, `Close`)
+            - Permission checking (`CheckPermission`)
+            - Principal injection (`InjectPrincipalToContext`)
+            - Error classification (`IsConnectivityError`, `IsConfigError`)
+            - Auth mode handling (strict/permissive fail-open behavior)
+            - All existing tests continue to pass
+
+            ## Interface Contracts
+            No interface contracts with other agents. This is independent removal work.
+
+            ## Test Requirements
+            All existing tests in `client_test.go` must continue to pass after removing
+            the `component` parameter from `NewClient` calls. No new tests required.
+
+            Test focus:
+            - `TestNewClient`: Verify client creation without component parameter
+            - `TestCheckPermission_*`: Verify permission checking continues to work
+            - All 11 test functions must pass
+
+            ## Verification Gate
+            ```bash
+            # Build
+            go build ./...
+
+            # Lint
+            go vet ./...
+
+            # Tests
+            go test -v -race -coverprofile=coverage.out ./...
+
+            # Postconditions
+            # (a) traceWriter field removed from Client struct
+            ! grep -q "traceWriter" client.go
+
+            # (b) component parameter removed from NewClient signature
+            grep -q "^func NewClient(host string, mode AuthMode) " client.go
+
+            # (c) emitAuthzTrace method deleted
+            ! grep -q "func.*emitAuthzTrace" client.go
+
+            # (d) emitErrorTrace method deleted
+            ! grep -q "func.*emitErrorTrace" client.go
+
+            # (e) pkg/trace import removed
+            ! grep -q "github.com/blackwell-systems/gcp-emulator-auth/pkg/trace" client.go
+
+            # (f) All test calls updated (no component parameter)
+            ! grep -q 'NewClient.*"test-client"' client_test.go
+            ```
+
+            ## Constraints
+            - Do NOT modify files outside your ownership list (client.go, client_test.go)
+            - Do NOT modify pkg/trace/types.go (shared schema, preserved for other repos)
+            - Do NOT remove principal extraction helpers (ExtractPrincipalFromContext, etc.)
+            - Do NOT remove error classification functions (IsConnectivityError, IsConfigError)
+          files:
+            - client.go
+            - client_test.go
+        - id: B
+          task: |
+            ## Role
+            Delete pkg/trace Writer implementation and tests.
+
+            ## What to Implement
+            Remove the Writer implementation from pkg/trace directory. This component
+            provided buffered JSONL trace output with support for stdout and file
+            destinations. It is no longer needed after trace emission removal.
+
+            ### Files to Delete
+            1. `pkg/trace/writer.go` - Writer implementation with Emit/Flush/Close methods
+            2. `pkg/trace/writer_test.go` - Writer tests (4 test functions)
+
+            ### Deletion Steps
+            ```bash
+            rm pkg/trace/writer.go
+            rm pkg/trace/writer_test.go
+            ```
+
+            ### Preserved Files
+            - `pkg/trace/types.go` - Shared schema types (AuthzEvent, Actor, Target, etc.)
+            - `pkg/trace/types_test.go` - Schema type tests
+            - These files define the trace event schema used by other repositories in
+              the blackwell-systems GCP emulator suite and must be preserved.
+
+            ## Interface Contracts
+            No interface contracts with other agents. This is independent deletion work.
+
+            ## Test Requirements
+            No tests required after deletion. Verification gate confirms files are removed.
+
+            ## Verification Gate
+            ```bash
+            # Build (pkg/trace should still compile with only types.go)
+            go build ./...
+
+            # Lint
+            go vet ./...
+
+            # Tests (types_test.go should still pass)
+            go test -v -race ./pkg/trace/...
+
+            # Postconditions
+            # (a) writer.go deleted
+            [ ! -f pkg/trace/writer.go ]
+
+            # (b) writer_test.go deleted
+            [ ! -f pkg/trace/writer_test.go ]
+
+            # (c) types.go still exists (preserved)
+            [ -f pkg/trace/types.go ]
+
+            # (d) types_test.go still exists (preserved)
+            [ -f pkg/trace/types_test.go ]
+            ```
+
+            ## Constraints
+            - Do NOT delete pkg/trace/types.go (shared schema, must be preserved)
+            - Do NOT delete pkg/trace/types_test.go (must be preserved)
+            - Do NOT modify any files, only delete writer.go and writer_test.go
+          files:
+            - pkg/trace/writer.go
+            - pkg/trace/writer_test.go
+        - id: C
+          task: |
+            ## Role
+            Delete pkg/trace Validator implementation and tests.
+
+            ## What to Implement
+            Remove the Validator implementation from pkg/trace directory. This component
+            provided JSONL trace file validation with support for .gz compression. It is
+            no longer needed after trace emission removal.
+
+            ### Files to Delete
+            1. `pkg/trace/validator.go` - Validator implementation with ValidateEvent/ValidateJSONLFile
+            2. `pkg/trace/validator_test.go` - Validator tests (5 test functions)
+
+            ### Deletion Steps
+            ```bash
+            rm pkg/trace/validator.go
+            rm pkg/trace/validator_test.go
+            ```
+
+            ### Preserved Files
+            - `pkg/trace/types.go` - Shared schema types (AuthzEvent, Actor, Target, etc.)
+            - `pkg/trace/types_test.go` - Schema type tests
+            - These files define the trace event schema used by other repositories in
+              the blackwell-systems GCP emulator suite and must be preserved.
+
+            ## Interface Contracts
+            No interface contracts with other agents. This is independent deletion work.
+
+            ## Test Requirements
+            No tests required after deletion. Verification gate confirms files are removed.
+
+            ## Verification Gate
+            ```bash
+            # Build (pkg/trace should still compile with only types.go)
+            go build ./...
+
+            # Lint
+            go vet ./...
+
+            # Tests (types_test.go should still pass)
+            go test -v -race ./pkg/trace/...
+
+            # Postconditions
+            # (a) validator.go deleted
+            [ ! -f pkg/trace/validator.go ]
+
+            # (b) validator_test.go deleted
+            [ ! -f pkg/trace/validator_test.go ]
+
+            # (c) types.go still exists (preserved)
+            [ -f pkg/trace/types.go ]
+
+            # (d) types_test.go still exists (preserved)
+            [ -f pkg/trace/types_test.go ]
+            ```
+
+            ## Constraints
+            - Do NOT delete pkg/trace/types.go (shared schema, must be preserved)
+            - Do NOT delete pkg/trace/types_test.go (must be preserved)
+            - Do NOT modify any files, only delete validator.go and validator_test.go
+          files:
+            - pkg/trace/validator.go
+            - pkg/trace/validator_test.go
+quality_gates:
+    level: standard
+    gates:
+        - type: build
+          command: go build ./...
+          required: true
+        - type: test
+          command: go test -v -race -coverprofile=coverage.out ./...
+          required: true
+        - type: lint
+          command: go vet ./...
+          required: true
+pre_mortem:
+    overall_risk: low
+    rows:
+        - scenario: Agent A removes time.Time import but it's needed elsewhere
+          likelihood: low
+          impact: low
+          mitigation: Verification gate includes go build check; compiler will catch missing imports
+        - scenario: Agent A accidentally modifies principal.go instead of client.go
+          likelihood: low
+          impact: medium
+          mitigation: File ownership is explicit; agent prompt lists exact files; postconditions verify changes in client.go only
+        - scenario: Agents B or C accidentally delete types.go (shared schema)
+          likelihood: low
+          impact: high
+          mitigation: Agent prompts explicitly preserve types.go and types_test.go; postconditions verify their existence; constraints section warns against deletion
+        - scenario: Test failures due to NewClient signature change propagate to other repos
+          likelihood: medium
+          impact: high
+          mitigation: This is expected external breakage (v0.4.0 breaking change); downstream repos (gcp-secret-manager-emulator, gcp-kms-emulator) must update their NewClient calls to remove component parameter in separate PRs
+        - scenario: Coverage drops below acceptable threshold after deletion
+          likelihood: low
+          impact: low
+          mitigation: All existing client tests preserved; pkg/trace tests for types.go remain; coverage should stay high (current 97.9 percent)
+critic_report:
+    verdict: PASS
+    agent_reviews:
+        A:
+            agent_id: A
+            verdict: PASS
+        B:
+            agent_id: B
+            verdict: PASS
+        C:
+            agent_id: C
+            verdict: PASS
+    summary: All agent briefs verified against codebase. Agent A's brief accurately describes the Client struct fields (traceWriter line 20, component line 21), NewClient signature (line 25), trace initialization (lines 34-40), timing tracking (lines 59, 73), trace emission calls (lines 77, 99), and the two trace emission methods (emitAuthzTrace lines 104-144, emitErrorTrace lines 146-179). All 11 NewClient call sites in client_test.go are correctly identified (lines 86, 132, 152, 175, 204, 232, 263, 296, 323, 361, 396). Agent B's brief correctly identifies writer.go and writer_test.go for deletion, with explicit preservation of types.go and types_test.go. Agent C's brief correctly identifies validator.go and validator_test.go for deletion, with the same preservation constraints. No I1 disjoint ownership violations detected. File distribution is balanced (2 files per agent, 33% each). All NewClient callers within the repo are covered by Agent A's file ownership. The time import will remain needed after deletions due to timeout field usage. README.md and CHANGELOG.md already document the 2-parameter NewClient signature, so code changes align with existing documentation.
+    reviewed_at: "2026-04-06T02:53:03Z"
+    issue_count: 0
+state: SCOUT_PENDING
+injection_method: hook
