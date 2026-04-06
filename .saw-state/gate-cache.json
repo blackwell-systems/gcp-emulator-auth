@@ -36,6 +36,30 @@
         "cached_at": "2026-04-05T19:54:06.984918-07:00"
       }
     },
+    "60cceecd8f84ea5f02e256cd5a92aa6e": {
+      "test": {
+        "gate_type": "test",
+        "command": "go test -v -race -coverprofile=coverage.out ./...",
+        "passed": false,
+        "exit_code": 1,
+        "stdout": "IAM emulator binary not found at ../gcp-iam-emulator/bin/server\nBuild it first: cd ../gcp-iam-emulator \u0026\u0026 make build\nFAIL\tgithub.com/blackwell-systems/gcp-emulator-auth\t0.312s\n=== RUN   TestNowRFC3339Nano_NotEmpty\n--- PASS: TestNowRFC3339Nano_NotEmpty (0.00s)\n=== RUN   TestValidator_ValidateEvent_Check_MinimumRequired\n--- PASS: TestValidator_ValidateEvent_Check_MinimumRequired (0.00s)\n=== RUN   TestValidator_ValidateEvent_Error_MinimumRequired\n--- PASS: TestValidator_ValidateEvent_Error_MinimumRequired (0.00s)\n=== RUN   TestValidator_ValidateEvent_MissingSchemaVersion\n--- PASS: TestValidator_ValidateEvent_MissingSchemaVersion (0.00s)\n=== RUN   TestValidator_ValidateEvent_InvalidOutcome\n--- PASS: TestValidator_ValidateEvent_InvalidOutcome (0.00s)\n=== RUN   TestValidator_ValidateJSONLFile_GoldenSample\n--- PASS: TestValidator_ValidateJSONLFile_GoldenSample (0.00s)\n=== RUN   TestWriter_EmitToFile\n--- PASS: TestWriter_EmitToFile (0.00s)\n=== RUN   TestNewWriterFromEnv_Disabled\n--- PASS: TestNewWriterFromEnv_Disabled (0.00s)\n=== RUN   TestNewWriterFromEnv_Enabled\n--- PASS: TestNewWriterFromEnv_Enabled (0.00s)\n=== RUN   TestWriter_EmitWhenNil\n--- PASS: TestWriter_EmitWhenNil (0.00s)\nPASS\ncoverage: 65.5% of statements\nok  \tgithub.com/blackwell-systems/gcp-emulator-auth/pkg/trace\t(cached)\tcoverage: 65.5% of statements\nFAIL\n",
+        "stderr": "",
+        "from_cache": true,
+        "cached_at": "2026-04-05T20:02:18.523742-07:00"
+      }
+    },
+    "76583a70d8acd98248dc274164d56458": {
+      "lint": {
+        "gate_type": "lint",
+        "command": "go vet ./...",
+        "passed": true,
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": "",
+        "from_cache": true,
+        "cached_at": "2026-04-05T20:02:18.914307-07:00"
+      }
+    },
     "885a5b200c4ef46130ac909cd0558781": {
       "test": {
         "gate_type": "test",
@@ -106,6 +130,18 @@
         "stderr": "pattern ./...: directory prefix . does not contain modules listed in go.work or their selected dependencies\n",
         "from_cache": true,
         "cached_at": "2026-04-05T19:54:36.843003-07:00"
+      }
+    },
+    "cb0536cdc82298767c9ab9e8e478a7fa": {
+      "build": {
+        "gate_type": "build",
+        "command": "go build ./...",
+        "passed": true,
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": "",
+        "from_cache": true,
+        "cached_at": "2026-04-05T20:02:17.048697-07:00"
       }
     }
   }
