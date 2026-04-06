@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-04-05
+
+### Fixed
+
+- Restored `pkg/trace/writer.go` — incorrectly removed in v0.4.0; `gcp-iam-emulator` requires `trace.Writer` and `trace.NewWriterFromEnv()` to emit authoritative traces
+
 ## [0.4.0] - 2026-04-05
 
 ### Removed
@@ -14,7 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Trace emission removed from client library** — `NewClient` no longer emits authorization traces
   - Deleted `emitAuthzTrace()` and `emitErrorTrace()` methods from `Client`
   - Removed `traceWriter` and `component` fields from `Client` struct
-  - Deleted `pkg/trace/writer.go` and `pkg/trace/writer_test.go`
   - Deleted `pkg/trace/validator.go` and `pkg/trace/validator_test.go`
   - Rationale: IAM emulator is sole authoritative trace emitter; client-side traces created duplicates
 
