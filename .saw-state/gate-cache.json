@@ -36,6 +36,18 @@
         "cached_at": "2026-04-05T19:54:06.984918-07:00"
       }
     },
+    "885a5b200c4ef46130ac909cd0558781": {
+      "test": {
+        "gate_type": "test",
+        "command": "go test -v -race -coverprofile=coverage.out ./...",
+        "passed": false,
+        "exit_code": 1,
+        "stdout": "IAM emulator binary not found at ../gcp-iam-emulator/bin/server\nBuild it first: cd ../gcp-iam-emulator \u0026\u0026 make build\nFAIL\tgithub.com/blackwell-systems/gcp-emulator-auth\t0.583s\n=== RUN   TestNowRFC3339Nano_NotEmpty\n--- PASS: TestNowRFC3339Nano_NotEmpty (0.00s)\n=== RUN   TestValidator_ValidateEvent_Check_MinimumRequired\n--- PASS: TestValidator_ValidateEvent_Check_MinimumRequired (0.00s)\n=== RUN   TestValidator_ValidateEvent_Error_MinimumRequired\n--- PASS: TestValidator_ValidateEvent_Error_MinimumRequired (0.00s)\n=== RUN   TestValidator_ValidateEvent_MissingSchemaVersion\n--- PASS: TestValidator_ValidateEvent_MissingSchemaVersion (0.00s)\n=== RUN   TestValidator_ValidateEvent_InvalidOutcome\n--- PASS: TestValidator_ValidateEvent_InvalidOutcome (0.00s)\n=== RUN   TestValidator_ValidateJSONLFile_GoldenSample\n--- PASS: TestValidator_ValidateJSONLFile_GoldenSample (0.00s)\n=== RUN   TestWriter_EmitToFile\n--- PASS: TestWriter_EmitToFile (0.00s)\n=== RUN   TestNewWriterFromEnv_Disabled\n--- PASS: TestNewWriterFromEnv_Disabled (0.00s)\n=== RUN   TestNewWriterFromEnv_Enabled\n--- PASS: TestNewWriterFromEnv_Enabled (0.00s)\n=== RUN   TestWriter_EmitWhenNil\n--- PASS: TestWriter_EmitWhenNil (0.00s)\nPASS\ncoverage: 65.5% of statements\nok  \tgithub.com/blackwell-systems/gcp-emulator-auth/pkg/trace\t1.258s\tcoverage: 65.5% of statements\nFAIL\n",
+        "stderr": "",
+        "from_cache": true,
+        "cached_at": "2026-04-05T19:55:26.148663-07:00"
+      }
+    },
     "8b4b93a60024e7980cc4e480c0445500": {
       "build": {
         "gate_type": "build",
@@ -46,6 +58,30 @@
         "stderr": "pattern ./...: directory prefix . does not contain modules listed in go.work or their selected dependencies\n",
         "from_cache": true,
         "cached_at": "2026-04-05T19:54:06.880435-07:00"
+      }
+    },
+    "8dd12d689e9a9e904b9d5cd691e51c0f": {
+      "lint": {
+        "gate_type": "lint",
+        "command": "go vet ./...",
+        "passed": true,
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": "",
+        "from_cache": true,
+        "cached_at": "2026-04-05T19:55:26.552547-07:00"
+      }
+    },
+    "a062d8a9532168c81614f5732293d072": {
+      "build": {
+        "gate_type": "build",
+        "command": "go build ./...",
+        "passed": true,
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": "",
+        "from_cache": true,
+        "cached_at": "2026-04-05T19:55:20.774925-07:00"
       }
     },
     "b5dd79a3088f7d0bb5ff672b0568d1f5": {
