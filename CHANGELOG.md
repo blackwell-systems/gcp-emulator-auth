@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-04-05
+
+### Removed
+
+- **Trace emission removed from client library** — `NewClient` no longer emits authorization traces
+  - Deleted `emitAuthzTrace()` and `emitErrorTrace()` methods from `Client`
+  - Removed `traceWriter` and `component` fields from `Client` struct
+  - Deleted `pkg/trace/writer.go` and `pkg/trace/writer_test.go`
+  - Deleted `pkg/trace/validator.go` and `pkg/trace/validator_test.go`
+  - Rationale: IAM emulator is sole authoritative trace emitter; client-side traces created duplicates
+
+### Changed
+
+- **Breaking: `NewClient` signature simplified** — removed `component string` parameter
+  - Before: `NewClient(host string, mode AuthMode, component string) (*Client, error)`
+  - After: `NewClient(host string, mode AuthMode) (*Client, error)`
+  - Downstream repos must remove the third argument from all `NewClient` calls
+- `pkg/trace/types.go` preserved — shared schema types remain for downstream consumers
+
 ## [0.3.0] - 2026-01-28
 
 ### Added
